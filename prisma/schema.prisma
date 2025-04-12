@@ -14,6 +14,8 @@ model User {
   email    String   @unique
   password String
   roles    UserRole[]
+
+  @@map("users")
 }
 
 // ロールでは, そのロールが持っているスコープを管理する.
@@ -22,12 +24,14 @@ model Role {
   name    String     @unique
   users   UserRole[]
   scopes  RoleScope[] // これもあってもなくてもいい 逆参照 将来的に必要になることを見込んで実装
+  @@map("roles")
 }
 
 model Scope {
   id    String       @id @default(uuid())
   name  String       @unique
   roles RoleScope[] //これはあってもなくてもいい 逆参照 将来的に必要になることを見込んで実装
+  @@map("scopes")
 }
 
 // ユーザとロールの交差テーブル
@@ -39,6 +43,8 @@ model UserRole {
   roleId String
 
   @@unique([userId, roleId])
+
+  @@map("user_role")
 }
 
 // ロールとスコープの交差テーブル
@@ -50,4 +56,6 @@ model RoleScope {
   scopeId String
 
   @@unique([roleId, scopeId])
+
+  @@map("role_scope")
 }

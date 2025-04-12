@@ -1,0 +1,53 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" 
+  url      = env("DATABASE_URL")
+}
+
+// Userテーブルでは, パスワードなどやそのユーザが持っているロールを管理する.
+model User {
+  id       String   @id @default(uuid())
+  email    String   @unique
+  password String
+  roles    UserRole[]
+}
+
+// ロールでは, そのロールが持っているスコープを管理する.
+model Role {
+  id      String     @id @default(uuid())
+  name    String     @unique
+  users   UserRole[]
+  scopes  RoleScope[] // これもあってもなくてもいい 逆参照 将来的に必要になることを見込んで実装
+}
+
+model Scope {
+  id    String       @id @default(uuid())
+  name  String       @unique
+  roles RoleScope[] //これはあってもなくてもいい 逆参照 将来的に必要になることを見込んで実装
+}
+
+// ユーザとロールの交差テーブル
+model UserRole {
+  id     String  @id @default(uuid())
+  user   User    @relation(fields: [userId], references: [id])
+  userId String
+  role   Role    @relation(fields: [roleId], references: [id])
+  roleId String
+
+  @@unique([userId, roleId])
+}
+
+// ロールとスコープの交差テーブル
+model RoleScope {
+  id      String  @id @default(uuid())
+  role    Role    @relation(fields: [roleId], references: [id])
+  roleId  String
+  scope   Scope   @relation(fields: [scopeId], references: [id])
+  scopeId String
+
+  @@unique([roleId, scopeId])
+}

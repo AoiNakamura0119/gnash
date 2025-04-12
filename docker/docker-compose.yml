@@ -1,0 +1,26 @@
+services:
+  gnash-database:
+    image: postgres:15.2-alpine
+    environment:
+      POSTGRES_DB: "main"
+      POSTGRES_USER: "gnash-developer"
+      POSTGRES_PASSWORD: "password"
+    ports:
+      - "15432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gnash-developer"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: gnash-redis
+    ports:
+      - "16379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--requirepass", "password"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "mysecretpass", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
